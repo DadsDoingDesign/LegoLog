@@ -11,7 +11,7 @@ import threading
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel
 
 from db import get_conn as db
@@ -611,4 +611,10 @@ def themes():
 
 @app.get("/")
 def index():
-    return FileResponse(BASE_DIR / "public" / "index.html")
+    # public/index.html isn't bundled into the Vercel function (Vercel serves
+    # public/** straight from its CDN and normally never reaches this route
+    # for "/" at all) — but it does exist on disk for local uvicorn dev.
+    local_path = BASE_DIR / "public" / "index.html"
+    if local_path.exists():
+        return FileResponse(local_path)
+    return RedirectResponse("/index.html")

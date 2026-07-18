@@ -1,0 +1,13 @@
+# Local-only build artifacts -- the app reads from Turso at runtime, not
+# these. Vercel CLI deploys upload the working directory as-is, so this
+# needs to be explicit (separate from .gitignore).
+legolog.db
+legolog.db-*
+data/
+.env
+.env.*
+!.env.example
+.tools/
+__pycache__/
+*.pyc
+.venv/
