@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "legolog",
+      "runtimeExecutable": "py",
+      "runtimeArgs": ["-3.10", "-m", "uvicorn", "app:app", "--port", "8100"],
+      "cwd": "Z:\\ClaudeWorkingFolder\\LegoLog",
+      "port": 8100
+    }
+  ]
+}

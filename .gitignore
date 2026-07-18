@@ -1,0 +1,20 @@
+# local catalog build (regenerate with import_data.py --download; migrate with push_to_turso.py)
+legolog.db
+legolog.db-*
+data/
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# stray tool downloads
+.tools/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# vercel
+.vercel
