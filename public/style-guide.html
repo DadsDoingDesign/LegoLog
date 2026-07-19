@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="LegoLog design system — tokens and components.">
+<meta name="theme-color" content="#020617">
+<title>LegoLog — Design System</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%230f172a'/%3E%3Ccircle cx='14' cy='14' r='5' fill='%23ef4444'/%3E%3Ccircle cx='26' cy='14' r='5' fill='%23facc15'/%3E%3Ccircle cx='14' cy='26' r='5' fill='%2360a5fa'/%3E%3Ccircle cx='26' cy='26' r='5' fill='%2322c55e'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="design-system.css">
+<style>
+  .sg-section { padding-block: var(--space-8); border-bottom: 1px solid var(--color-border); }
+  .sg-section:last-child { border-bottom: 0; }
+  .sg-section h2 { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 .25rem; }
+  .sg-section > .sg-desc { color: var(--color-text-muted); font-size: .875rem; max-width: 40rem; margin: 0 0 1.5rem; }
+  .sg-row { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-start; }
+  .sg-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: var(--space-3); }
+  .sg-swatch { border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
+  .sg-swatch-color { height: 3.5rem; }
+  .sg-swatch-meta { padding: var(--space-2) var(--space-3); font-size: .75rem; }
+  .sg-swatch-meta .name { color: var(--color-text); font-weight: 600; display: block; }
+  .sg-swatch-meta .hex { color: var(--color-text-muted); font-family: ui-monospace, monospace; }
+  .sg-type-row { display: flex; align-items: baseline; gap: var(--space-4); padding-block: var(--space-2); border-top: 1px solid var(--color-border); }
+  .sg-type-row:first-of-type { border-top: 0; }
+  .sg-type-row .label { width: 8rem; flex-shrink: 0; color: var(--color-text-muted); font-size: .75rem; font-family: ui-monospace, monospace; }
+  .sg-space-row { display: flex; align-items: center; gap: var(--space-3); padding-block: var(--space-1); }
+  .sg-space-row .bar { background: var(--color-primary); height: 1rem; border-radius: 2px; }
+  .sg-space-row .label { width: 6rem; font-size: .75rem; color: var(--color-text-muted); font-family: ui-monospace, monospace; }
+  code.sg-code { font-family: ui-monospace, monospace; font-size: .75rem; background: var(--color-surface-raised); padding: .125rem .375rem; border-radius: .25rem; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="container header-inner flex items-center gap-4">
+    <div class="brand">
+      <div class="stud-mark" aria-hidden="true">
+        <span class="stud stud-red"></span>
+        <span class="stud stud-yellow"></span>
+        <span class="stud stud-blue"></span>
+        <span class="stud stud-green"></span>
+      </div>
+      <h1 class="brand-name">Lego<span class="brand-accent">Log</span></h1>
+    </div>
+    <span class="text-sm text-muted">Design System</span>
+    <a href="index.html" class="btn btn-ghost btn-sm ml-auto">← Back to app</a>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="sg-section">
+    <h2>Color</h2>
+    <p class="sg-desc">Neutral scale (the "workbench") plus the four brand accents. Full rationale in <code class="sg-code">design/BRAND_GUIDE.md</code>.</p>
+    <p class="text-sm text-muted" style="margin-bottom:.75rem;">Neutrals</p>
+    <div class="sg-swatches" style="margin-bottom:1.5rem;">
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--color-bg)"></div><div class="sg-swatch-meta"><span class="name">bg</span><span class="hex">#020617</span></div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--color-surface)"></div><div class="sg-swatch-meta"><span class="name">surface</span><span class="hex">#0F172A</span></div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--color-surface-raised)"></div><div class="sg-swatch-meta"><span class="name">surface-raised</span><span class="hex">#1E293B</span></div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--color-border-strong)"></div><div class="sg-swatch-meta"><span class="name">border-strong</span><span class="hex">#334155</span></div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--color-text-muted)"></div><div class="sg-swatch-meta"><span class="name">text-muted</span><span class="hex">#94A3B8</span></div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--color-text-faint)"></div><div class="sg-swatch-meta"><span class="name">text-faint*</span><span class="hex">#64748B</span></div></div>
+    </div>
+    <p class="text-xs text-muted" style="margin-bottom:1.5rem;">* decorative only — fails WCAG AA for body text at this background, see Brand Guide §3.3</p>
+    <p class="text-sm text-muted" style="margin-bottom:.75rem;">Brand accents — "the brick four"</p>
+    <div class="sg-swatches">
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--color-primary)"></div><div class="sg-swatch-meta"><span class="name">primary (yellow)</span><span class="hex">#FACC15</span></div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--color-danger-strong)"></div><div class="sg-swatch-meta"><span class="name">danger (red)</span><span class="hex">#EF4444</span></div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--color-info)"></div><div class="sg-swatch-meta"><span class="name">info (blue)</span><span class="hex">#60A5FA</span></div></div>
+      <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--color-success-strong)"></div><div class="sg-swatch-meta"><span class="name">success (green)</span><span class="hex">#22C55E</span></div></div>
+    </div>
+  </section>
+
+  <section class="sg-section">
+    <h2>Typography</h2>
+    <p class="sg-desc">System sans for everything except brand/headline moments, which use a zero-dependency rounded stack. No webfont requests — see <code class="sg-code">design/DESIGN_SYSTEM.md</code> for why.</p>
+    <div class="sg-type-row"><span class="label">display / xl</span><span style="font-family:var(--font-display); font-size:1.375rem; font-weight:700;">LegoLog — Buildable</span></div>
+    <div class="sg-type-row"><span class="label">text-lg</span><span class="text-lg font-semibold">Section headline</span></div>
+    <div class="sg-type-row"><span class="label">text-base</span><span class="text-base">Body copy — the default reading size</span></div>
+    <div class="sg-type-row"><span class="label">text-sm</span><span class="text-sm font-medium">75192-1 · 2017 · Star Wars · 7,541 parts</span></div>
+    <div class="sg-type-row"><span class="label">text-xs / muted</span><span class="text-xs text-muted">Metadata, captions, secondary labels</span></div>
+    <div class="sg-type-row"><span class="label">tabular nums</span><span class="num font-semibold">1,204&nbsp;&nbsp;1,205&nbsp;&nbsp;1,206</span><span class="text-xs text-muted">(fixed-width digits for live counters)</span></div>
+  </section>
+
+  <section class="sg-section">
+    <h2>Spacing</h2>
+    <p class="sg-desc">4px base unit. Same scale the app already used under Tailwind — now named tokens instead of implicit utility classes.</p>
+    <div class="sg-space-row"><span class="label">space-1 · 4px</span><span class="bar" style="width:var(--space-1)"></span></div>
+    <div class="sg-space-row"><span class="label">space-2 · 8px</span><span class="bar" style="width:var(--space-2)"></span></div>
+    <div class="sg-space-row"><span class="label">space-3 · 12px</span><span class="bar" style="width:var(--space-3)"></span></div>
+    <div class="sg-space-row"><span class="label">space-4 · 16px</span><span class="bar" style="width:var(--space-4)"></span></div>
+    <div class="sg-space-row"><span class="label">space-6 · 24px</span><span class="bar" style="width:var(--space-6)"></span></div>
+    <div class="sg-space-row"><span class="label">space-8 · 32px</span><span class="bar" style="width:var(--space-8)"></span></div>
+  </section>
+
+  <section class="sg-section">
+    <h2>Buttons &amp; icon buttons</h2>
+    <p class="sg-desc">One dominant accent (yellow, primary actions only). Icon-only buttons always carry <code class="sg-code">aria-label</code>.</p>
+    <div class="sg-row" style="margin-bottom:1rem;">
+      <button class="btn btn-primary">+ Add</button>
+      <button class="btn btn-secondary">Load more</button>
+      <button class="btn btn-ghost">Reset filters</button>
+      <button class="btn btn-primary btn-sm">Small primary</button>
+    </div>
+    <div class="sg-row">
+      <button class="icon-btn" aria-label="Decrease quantity">−</button>
+      <button class="icon-btn" aria-label="Increase quantity">+</button>
+      <button class="icon-btn icon-btn-ghost" aria-label="Remove">✕</button>
+    </div>
+  </section>
+
+  <section class="sg-section">
+    <h2>Form controls</h2>
+    <div class="sg-row items-end">
+      <label class="field" style="max-width:20rem; flex:1;">
+        <span class="field-label">Search</span>
+        <input class="input search-input" style="margin-top:.375rem;" placeholder="e.g. 75192 or Millennium Falcon">
+      </label>
+      <label class="field">
+        <span class="field-label">Theme</span>
+        <select class="select" style="display:block; margin-top:.375rem; width:11rem;"><option>All themes</option><option>Star Wars</option></select>
+      </label>
+      <label class="field">
+        <span class="field-label">Coverage ≥ <span class="value">85%</span></span>
+        <input type="range" class="range" style="display:block; width:9rem; margin-top:.5rem;" value="85">
+      </label>
+      <label class="checkbox-field"><input type="checkbox" class="checkbox" checked> Ignore color</label>
+    </div>
+  </section>
+
+  <section class="sg-section">
+    <h2>Tabs</h2>
+    <p class="sg-desc">Real ARIA tabs — arrow-key navigation, roving <code class="sg-code">tabindex</code>, active state driven by <code class="sg-code">aria-selected</code> rather than a hand-built class string.</p>
+    <nav class="tabs" role="tablist" aria-label="Example">
+      <button class="tab" role="tab" aria-selected="true">My Collection</button>
+      <button class="tab" role="tab" aria-selected="false" tabindex="-1">What Can I Build?</button>
+    </nav>
+  </section>
+
+  <section class="sg-section">
+    <h2>Badges &amp; progress</h2>
+    <div class="sg-row items-center" style="margin-bottom:1.5rem;">
+      <span class="owned-tag">✓ own 2</span>
+      <span class="badge badge-success">✓ Buildable</span>
+    </div>
+    <div style="max-width:20rem;">
+      <div class="progress"><div class="progress-fill" style="width:72%"></div></div>
+      <div class="buildable-status"><span class="text-muted">72%</span><span class="text-muted">missing 74 of 263</span></div>
+      <div class="progress" style="margin-top:1rem;"><div class="progress-fill is-complete" style="width:100%"></div></div>
+      <div class="buildable-status"><span class="text-success font-semibold">✓ Buildable</span><span class="text-muted">200 parts</span></div>
+    </div>
+  </section>
+
+  <section class="sg-section">
+    <h2>Cards</h2>
+    <div class="sg-row">
+      <div class="card collection-card" style="max-width:26rem;">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='6' fill='%23f1f5f9'/%3E%3Ccircle cx='14' cy='14' r='4' fill='%23cbd5e1'/%3E%3Ccircle cx='26' cy='14' r='4' fill='%23cbd5e1'/%3E%3Ccircle cx='14' cy='26' r='4' fill='%23cbd5e1'/%3E%3Ccircle cx='26' cy='26' r='4' fill='%23cbd5e1'/%3E%3C/svg%3E"
+             class="thumb thumb-fallback" style="width:5rem;height:5rem;">
+        <div class="min-w-0 flex-1">
+          <div class="font-medium truncate">Millennium Falcon</div>
+          <div class="text-xs text-muted" style="margin-top:.125rem;">75192-1 · 2017 · Star Wars · 7,541 parts</div>
+        </div>
+        <div class="qty-control shrink-0">
+          <button class="icon-btn" aria-label="Decrease quantity">−</button>
+          <span class="qty-value num">1</span>
+          <button class="icon-btn" aria-label="Increase quantity">+</button>
+        </div>
+        <button class="icon-btn icon-btn-ghost shrink-0" aria-label="Remove">✕</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="sg-section">
+    <h2>Data table &amp; color chips</h2>
+    <p class="sg-desc">The missing-parts breakdown — matches the color-chip convention BrickLink/Rebrickable users already know (Brand Guide §5).</p>
+    <table class="data-table" style="max-width:32rem;">
+      <thead><tr><th>Part</th><th>Color</th><th class="text-right">Have</th><th class="text-right">Need</th><th class="text-right text-danger">Short</th></tr></thead>
+      <tbody>
+        <tr><td><span class="text-muted">3001</span> Brick 2x4</td><td><span class="color-chip" style="background:#C91A09"></span>Red</td><td class="text-right num">10</td><td class="text-right num">14</td><td class="text-right text-danger font-medium num">4</td></tr>
+        <tr><td><span class="text-muted">3023</span> Plate 1x2</td><td><span class="color-chip" style="background:#F2CD37"></span>Yellow</td><td class="text-right num">2</td><td class="text-right num">8</td><td class="text-right text-danger font-medium num">6</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="sg-section">
+    <h2>Empty states</h2>
+    <p class="sg-desc">One sentence of plain instruction, no marketing voice (Brand Guide §6).</p>
+    <div class="card" style="padding:1rem 0;">
+      <div class="empty-state" style="margin-top:0;">
+        <p class="headline">No sets yet.</p>
+        <p>Search above to add the sets you own — quantities supported.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sg-section">
+    <h2>Toasts</h2>
+    <p class="sg-desc">Error feedback (wired into every API call) and undo-on-remove (Design System doc, "Behavior changes"). Static previews below — the real thing in <code class="sg-code">index.html</code> auto-dismisses after 6s.</p>
+    <div class="toast-region" style="position:static; width:22rem;">
+      <div class="toast"><span class="toast-message">Removed Millennium Falcon</span><button class="toast-action">Undo</button><button class="icon-btn icon-btn-ghost" aria-label="Dismiss" style="width:1.5rem;height:1.5rem;">✕</button></div>
+      <div class="toast toast-danger"><span class="toast-message">Couldn't reach the server — try again.</span><button class="icon-btn icon-btn-ghost" aria-label="Dismiss" style="width:1.5rem;height:1.5rem;">✕</button></div>
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

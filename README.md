@@ -98,3 +98,16 @@ py -3.10 -m uvicorn app:app --port 8100
 - Part matching is exact on `(part_num, color)` — no mold-variant or alternate-part
   substitution yet (`part_relationships.csv` would enable that).
 - Data © Rebrickable — thanks!
+
+## Design system
+
+`public/index.html` is styled entirely by `public/design-system.css` — a small,
+self-hosted, zero-build-step stylesheet (no CDN, no compile step). Browse every
+token and component at `public/style-guide.html`. Full writeup — brand guide,
+a design/usability audit of the previous build, and the system's rationale —
+lives in `design/`:
+
+- [`design/BRAND_GUIDE.md`](design/BRAND_GUIDE.md)
+- [`design/WEBSITE_AUDIT.md`](design/WEBSITE_AUDIT.md)
+- [`design/USABILITY_AUDIT.md`](design/USABILITY_AUDIT.md)
+- [`design/DESIGN_SYSTEM.md`](design/DESIGN_SYSTEM.md)
