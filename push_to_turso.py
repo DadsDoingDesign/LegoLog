@@ -58,6 +58,15 @@ CREATE TABLE IF NOT EXISTS owned_sets (
     added_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Cache of LDraw.org Official Model Repository lookups for "View in 3D"
+-- (app.py also creates this lazily, so re-running this script isn't required
+-- for the feature to work) — never dropped, same as owned_sets.
+CREATE TABLE IF NOT EXISTS ldraw_models (
+    set_num TEXT PRIMARY KEY,
+    model_url TEXT,
+    checked_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE INDEX idx_set_parts_set ON set_parts(set_num);
 CREATE INDEX idx_set_parts_part ON set_parts(part_num, color_id, set_num, quantity, spare_quantity);
 """

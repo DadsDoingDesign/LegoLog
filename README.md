@@ -111,3 +111,10 @@ lives in `design/`:
 - [`design/WEBSITE_AUDIT.md`](design/WEBSITE_AUDIT.md)
 - [`design/USABILITY_AUDIT.md`](design/USABILITY_AUDIT.md)
 - [`design/DESIGN_SYSTEM.md`](design/DESIGN_SYSTEM.md)
+
+Each set also has a **View in 3D** button — renders a community-built LDraw
+model of the set in-browser (three.js + LDrawLoader) when one exists on
+[LDraw.org's Official Model Repository](https://library.ldraw.org/omr), falling
+back to the product photo otherwise. See
+[`design/3D_VIEWER.md`](design/3D_VIEWER.md) for how it works and — important —
+which parts of it are verified vs. best-effort.

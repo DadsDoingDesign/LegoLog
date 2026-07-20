@@ -7,11 +7,15 @@ Run with:  py -3.10 -m uvicorn app:app --port 8100
 """
 
 import itertools
+import re
 import threading
+import urllib.error
+import urllib.parse
+import urllib.request
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, Response
 from pydantic import BaseModel
 
 from db import get_conn as db
@@ -600,6 +604,120 @@ def themes():
         ).fetchall()
     }
     return [dict(r) for r in rows if r["id"] not in bad_ids]
+
+
+# ---------------------------------------------------------------- 3D models
+#
+# "View in 3D" renders a set client-side (three.js + LDrawLoader, see
+# public/lego3d.js) from a community-built LDraw file, if one exists, on
+# LDraw.org's Official Model Repository (OMR) — a free, CC-BY-licensed
+# library of LDraw replicas of official LEGO sets, searchable by set number.
+# OMR has no documented public API; the lookup below is a best-effort scrape
+# built from its published file-naming spec (ldraw.org/article/593.html) and
+# usage docs. It was NOT possible to test it against the live site during
+# development (library.ldraw.org isn't reachable from that environment's
+# network policy) — see design/DESIGN_SYSTEM.md for the full caveat. It fails
+# closed: any request error, timeout, or markup mismatch just means no model
+# is found for that set (same as a set OMR genuinely doesn't have), never a
+# crash — the UI falls back to the existing product photo either way.
+
+OMR_BASE = "https://library.ldraw.org"
+OMR_SEARCH_URL = OMR_BASE + "/omr/sets/?search={}"
+_MODEL_FILE_RE = re.compile(r'href="([^"]+\.(?:mpd|ldr|io))"', re.IGNORECASE)
+_SET_PAGE_RE = re.compile(r'href="(/omr/sets/\d+/?)"')
+
+_ldraw_table_lock = threading.Lock()
+_ldraw_table_ready = False
+
+
+def _ensure_ldraw_table():
+    global _ldraw_table_ready
+    if _ldraw_table_ready:
+        return
+    with _ldraw_table_lock:
+        if not _ldraw_table_ready:
+            db().execute(
+                """CREATE TABLE IF NOT EXISTS ldraw_models (
+                    set_num TEXT PRIMARY KEY,
+                    model_url TEXT,
+                    checked_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )"""
+            )
+            db().commit()
+            _ldraw_table_ready = True
+
+
+def _http_get(url: str, timeout: float = 8.0) -> str:
+    req = urllib.request.Request(
+        url, headers={"User-Agent": "LegoLog/1.0 (personal LEGO collection tracker)"}
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read().decode("utf-8", errors="replace")
+
+
+def _lookup_omr_model(set_num: str) -> str | None:
+    base_num = re.sub(r"-\d+$", "", set_num)  # OMR indexes by box number, not Rebrickable's "-1" variant suffix
+    try:
+        search_html = _http_get(OMR_SEARCH_URL.format(urllib.parse.quote(base_num)))
+    except (urllib.error.URLError, TimeoutError, ValueError):
+        return None
+
+    direct = _MODEL_FILE_RE.search(search_html)
+    if direct:
+        return urllib.parse.urljoin(OMR_BASE, direct.group(1))
+
+    set_page = _SET_PAGE_RE.search(search_html)
+    if not set_page:
+        return None
+    try:
+        detail_html = _http_get(urllib.parse.urljoin(OMR_BASE, set_page.group(1)))
+    except (urllib.error.URLError, TimeoutError, ValueError):
+        return None
+    detail_match = _MODEL_FILE_RE.search(detail_html)
+    return urllib.parse.urljoin(OMR_BASE, detail_match.group(1)) if detail_match else None
+
+
+def _cached_model_url(set_num: str, refresh: bool = False) -> str | None:
+    _ensure_ldraw_table()
+    if not refresh:
+        row = db().execute(
+            "SELECT model_url FROM ldraw_models WHERE set_num = ?", (set_num,)
+        ).fetchone()
+        if row is not None:
+            return row["model_url"]
+
+    model_url = _lookup_omr_model(set_num)
+    db().execute(
+        """INSERT INTO ldraw_models (set_num, model_url) VALUES (?, ?)
+           ON CONFLICT(set_num) DO UPDATE SET model_url = excluded.model_url,
+                                               checked_at = CURRENT_TIMESTAMP""",
+        (set_num, model_url),
+    )
+    db().commit()
+    return model_url
+
+
+@app.get("/api/sets/{set_num}/ldraw-model")
+def ldraw_model(set_num: str, refresh: bool = False):
+    """Cheap existence check — used to decide whether to show "View in 3D"
+    without fetching the (larger) model file itself."""
+    model_url = _cached_model_url(set_num, refresh=refresh)
+    return {"set_num": set_num, "available": model_url is not None}
+
+
+@app.get("/api/sets/{set_num}/ldraw-model/file")
+def ldraw_model_file(set_num: str):
+    """Streams the actual LDraw file through our own origin — LDrawLoader
+    fetches this client-side, and proxying avoids depending on OMR sending
+    CORS headers for a page it wasn't built to be fetched from cross-origin."""
+    model_url = _cached_model_url(set_num)
+    if not model_url:
+        raise HTTPException(404, "no LDraw model found for this set")
+    try:
+        content = _http_get(model_url, timeout=15.0)
+    except (urllib.error.URLError, TimeoutError, ValueError):
+        raise HTTPException(502, "couldn't fetch the model file from LDraw.org")
+    return Response(content=content, media_type="text/plain")
 
 
 # ---------------------------------------------------------------- static
