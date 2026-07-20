@@ -697,6 +697,26 @@ def _cached_model_url(set_num: str, refresh: bool = False) -> str | None:
     return model_url
 
 
+@app.get("/api/collection/ldraw-models")
+def collection_ldraw_models():
+    """Cached-only, bulk: {set_num: model_url} for every owned set already
+    checked. Never triggers a live OMR fetch (unlike the per-set endpoint) —
+    the 3D map tab uses this to render real models instantly for sets seen
+    before, then falls back to individual /ldraw-model calls (with a
+    concurrency cap, client-side) for whatever's missing here."""
+    _ensure_ldraw_table()
+    owned = db().execute("SELECT set_num FROM owned_sets").fetchall()
+    set_nums = [r["set_num"] for r in owned]
+    if not set_nums:
+        return {}
+    placeholders = ",".join("?" * len(set_nums))
+    rows = db().execute(
+        f"SELECT set_num, model_url FROM ldraw_models WHERE set_num IN ({placeholders})",
+        set_nums,
+    ).fetchall()
+    return {r["set_num"]: r["model_url"] for r in rows}
+
+
 @app.get("/api/sets/{set_num}/ldraw-model")
 def ldraw_model(set_num: str, refresh: bool = False):
     """Cheap existence check — used to decide whether to show "View in 3D"

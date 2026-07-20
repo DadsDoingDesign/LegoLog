@@ -28,6 +28,7 @@
     <nav class="tabs" role="tablist" aria-label="Sections">
       <button id="tab-btn-collection" class="tab" role="tab" aria-selected="true" aria-controls="tab-collection" data-tab="collection">My Collection</button>
       <button id="tab-btn-buildable" class="tab" role="tab" aria-selected="false" aria-controls="tab-buildable" data-tab="buildable" tabindex="-1">What Can I Build?</button>
+      <button id="tab-btn-map" class="tab" role="tab" aria-selected="false" aria-controls="tab-map" data-tab="map" tabindex="-1">3D Map</button>
     </nav>
     <div id="stats" class="stats flex gap-4 ml-auto"></div>
   </div>
@@ -91,6 +92,19 @@
     <div id="buildable-grid" class="buildable-grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" style="margin-top:1.5rem;"></div>
     <div class="flex" style="justify-content:center; margin-top:1.5rem;">
       <button id="load-more" class="btn btn-secondary hidden">Load more</button>
+    </div>
+  </section>
+
+  <!-- ============ 3D MAP TAB ============ -->
+  <section id="tab-map" role="tabpanel" aria-labelledby="tab-btn-map" tabindex="0" class="hidden">
+    <div id="map-empty" class="empty-state hidden">
+      <p class="headline">No sets yet.</p>
+      <p>Add sets to your collection first, then come back to explore them here.</p>
+    </div>
+    <div id="map-wrap" class="hidden">
+      <div id="map-container" style="position:relative; width:100%; height:34rem; border-radius:var(--radius-lg); overflow:hidden; background:var(--color-bg); border:1px solid var(--color-border);"></div>
+      <div id="map-hint" class="map-hint" style="position:static; transform:none; display:inline-block; margin-top:.75rem;">Click the scene to look around · WASD to move · Space / Shift for up / down · Esc to release the cursor</div>
+      <div id="map-loading" class="text-xs text-muted" style="margin-top:.5rem;"></div>
     </div>
   </section>
 </main>
@@ -159,15 +173,19 @@ const api = async (path, opts) => {
 // ---------------- tabs ----------------
 let activeTab = 'collection';
 function showTab(name) {
+  const leavingMap = activeTab === 'map' && name !== 'map';
   activeTab = name;
   $('#tab-collection').classList.toggle('hidden', name !== 'collection');
   $('#tab-buildable').classList.toggle('hidden', name !== 'buildable');
+  $('#tab-map').classList.toggle('hidden', name !== 'map');
   document.querySelectorAll('.tab').forEach(b => {
     const on = b.dataset.tab === name;
     b.setAttribute('aria-selected', on ? 'true' : 'false');
     b.tabIndex = on ? 0 : -1;
   });
+  if (leavingMap) lego3dMapModule?.disposeMap(); // stop the render loop / release listeners while off-screen
   if (name === 'buildable') loadBuildable(true);
+  if (name === 'map') loadMap();
 }
 document.querySelectorAll('.tab').forEach(b => b.onclick = () => showTab(b.dataset.tab));
 $('.tabs').addEventListener('keydown', e => {
@@ -502,6 +520,58 @@ async function open3DModel(setNum, name) {
   } catch (e) {
     if (openModalEl) container.innerHTML = '<div class="text-sm text-danger" style="padding:1.5rem;">Couldn\'t load the 3D model.</div>';
   }
+}
+
+// ---------------- 3D collection map ----------------
+let lego3dMapModule = null;
+let mapLoadToken = 0; // guards against a stale load finishing after the tab was switched away and back
+
+async function loadMap() {
+  const token = ++mapLoadToken;
+  const data = await api('/api/collection');
+  const sets = data.sets;
+  $('#map-empty').classList.toggle('hidden', sets.length > 0);
+  $('#map-wrap').classList.toggle('hidden', sets.length === 0);
+  if (!sets.length) return;
+
+  const cached = await api('/api/collection/ldraw-models').catch(() => ({}));
+  if (token !== mapLoadToken) return;
+
+  const items = sets.map(s => ({
+    setNum: s.set_num, name: s.name, imgUrl: s.img_url,
+    modelFileUrl: cached[s.set_num] ? `/api/sets/${encodeURIComponent(s.set_num)}/ldraw-model/file` : null,
+  }));
+
+  lego3dMapModule = lego3dMapModule || await import('./lego3dmap.js');
+  if (token !== mapLoadToken) return;
+
+  let upgraded = 0;
+  $('#map-loading').textContent = `Placing ${items.length} sets…`;
+  await lego3dMapModule.renderCollectionMap($('#map-container'), items, {
+    onLockChange: locked => $('#map-hint').classList.toggle('is-hidden', locked),
+    onSetSettled: (setNum, hasModel) => {
+      if (token !== mapLoadToken) return;
+      if (hasModel) upgraded++;
+      $('#map-loading').textContent =
+        `${upgraded} of ${items.length} sets rendered in 3D so far — the rest show as photo cards.`;
+    },
+  });
+
+  // Sets not yet in the cache: check them in the background (a few at a
+  // time) purely to warm the cache for next visit — not awaited, and never
+  // shows an error toast, since this wasn't a user-initiated action.
+  warmModelCache(sets.map(s => s.set_num).filter(n => !(n in cached)));
+}
+
+async function warmModelCache(setNums) {
+  let cursor = 0;
+  const worker = async () => {
+    while (cursor < setNums.length) {
+      const setNum = setNums[cursor++];
+      try { await fetch(`/api/sets/${encodeURIComponent(setNum)}/ldraw-model`); } catch { /* best-effort */ }
+    }
+  };
+  await Promise.all(Array.from({length: Math.min(3, setNums.length)}, worker));
 }
 
 // ---------------- init ----------------
